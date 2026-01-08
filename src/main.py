@@ -3,6 +3,8 @@ import asyncio
 from typeguard import typechecked
 from pydantic import validate_call
 from common import DateTimeProvider, AppSettings
+from dotenv import load_dotenv
+import os
 
 
 # EXAMPLE 1: Missing Argument and Return Types
@@ -36,3 +38,8 @@ greet('1223')
 print("hello wordl")
 print(DateTimeProvider().today())
 print(AppSettings().external_api_base_url)
+print(AppSettings().ENV_FILE_PATH)
+print(AppSettings().database.url)
+
+load_dotenv()
+print("From os.environ:", os.environ.get("APP_EXTERNAL_API_BASE_URL"))

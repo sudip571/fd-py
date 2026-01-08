@@ -1,39 +1,34 @@
-
 from typing import Tuple, Type, ClassVar
 from pathlib import Path
+from common.config_properties import PropertiesSettings
 from pydantic import BaseModel, Field
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
-    SettingsConfigDict,
     JsonConfigSettingsSource,
     EnvSettingsSource,
     DotEnvSettingsSource,
+    SettingsConfigDict,
 )
 
 
-class DbSettings(BaseModel):
-    url: str
-    pool_size: int
-
-
-class AppSettings(BaseSettings):
+class AppSettings(BaseSettings, PropertiesSettings):
 
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent
     CONFIG_FILE_PATH: ClassVar[str] = str(
         BASE_DIR.parent / "configuration" / "appsettings.json"
     )
-
-    model_config = SettingsConfigDict(
-        env_prefix="APP_",
-        env_nested_delimiter="__",
-        extra="ignore",
+    ENV_FILE_PATH: ClassVar[str] = str(
+        BASE_DIR.parent.parent / ".env"
     )
 
-    environment: str = Field(default="development")
-    app_name: str
-    external_api_base_url: str | None = None
-    database: DbSettings
+    model_config = SettingsConfigDict(
+        populate_by_name=True,
+        extra="ignore",
+        env_prefix="APP_",
+        env_nested_delimiter="__",
+        case_sensitive=False,
+    )
 
     @classmethod
     def settings_customise_sources(
@@ -45,38 +40,33 @@ class AppSettings(BaseSettings):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> Tuple[PydanticBaseSettingsSource, ...]:
 
+        # Explicitly create all sources with proper configuration
         return (
-            # 1️⃣ Lowest priority
+            DotEnvSettingsSource(
+                settings_cls=settings_cls,
+                env_file=cls.ENV_FILE_PATH,
+                env_file_encoding="utf-8",
+                case_sensitive=False,
+                env_prefix="APP_",
+                env_nested_delimiter="__",
+            ),
+            EnvSettingsSource(
+                settings_cls=settings_cls,
+                case_sensitive=False,
+                env_prefix="APP_",
+                env_nested_delimiter="__",
+            ),
+            init_settings,
             JsonConfigSettingsSource(
                 settings_cls=settings_cls,
                 json_file=cls.CONFIG_FILE_PATH,
-            ),
-
-            # 2️⃣ .env (MUST be explicitly configured)
-            DotEnvSettingsSource(
-                settings_cls=settings_cls,
-                env_file=".env",
-                env_prefix="APP_",
-                env_nested_delimiter="__",
-            ),
-
-            # 3️⃣ Real environment variables
-            EnvSettingsSource(
-                settings_cls=settings_cls,
-                env_prefix="APP_",
-                env_nested_delimiter="__",
-            ),
-
-            # 4️⃣ Constructor args (highest)
-            init_settings,
+            )
         )
 
     @property
     def is_development(self) -> bool:
-        """Check if running in development"""
         return self.environment.lower() == "development"
 
     @property
     def is_production(self) -> bool:
-        """Check if running in production"""
         return self.environment.lower() == "production"
