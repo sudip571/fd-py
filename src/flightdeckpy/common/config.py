@@ -1,6 +1,6 @@
 from typing import Tuple, Type, ClassVar
 from pathlib import Path
-from common.config_properties import PropertiesSettings
+from .config_properties import PropertiesSettings
 from pydantic import BaseModel, Field
 from pydantic_settings import (
     BaseSettings,
