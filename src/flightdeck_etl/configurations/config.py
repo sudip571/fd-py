@@ -13,7 +13,7 @@ from pydantic_settings import (
 import os
 
 
-class AppSettings(BaseSettings, PropertiesSettings):
+class AppSettings(BaseSettings, PropertiesSettings): # type: ignore
 
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent
     CONFIG_FILE_PATH: ClassVar[str] = str(

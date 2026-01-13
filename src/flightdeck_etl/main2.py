@@ -1,3 +1,4 @@
+# @validate_call
 def greet(name: str) -> str:
     print(f"hello {name}")
     return f"Hello, {name}"
@@ -9,4 +10,4 @@ def add_numbers(a: int, b: int) -> None:
     # Error: We forgot to return the value and didn't annotate '-> int'
 
 
-greet(1223)
+greet("1223")

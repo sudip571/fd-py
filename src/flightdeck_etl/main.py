@@ -12,51 +12,7 @@ from flightdeck_etl.shared.models.client_model import Client
 Log.debug("Something went wrong", error_code=500)
 
 
-# testing api request
 
-
-class PostResponse(BaseModel):
-    userId: int
-    id: int
-    title: str
-    body: str
-
-
-async def maink():
-    api = ApiClient(base_url="https://jsonplaceholder.typicode.com")
-
-    post = await api.get(
-        endpoint="/posts/1", params=None, headers=None, response_model=PostResponse
-    )
-
-    print("Post ID:", post.id)
-    print("Title:", post.title)
-    print("Body:", post.body[:50], "...")  # preview
-
-
-async def mainp():
-    api = ApiClient(base_url="https://jsonplaceholder.typicode.com")
-
-    payload = {
-        "title": "FlightDeck Test",
-        "body": "This is a test post from Sudip's DAG.",
-        "userId": 99,
-    }
-    headers = {"Content-Type": "application/json"}
-
-    post = await api.post(
-        endpoint="/posts", payload=payload, headers=headers, response_model=PostResponse
-    )
-
-    print("Created Post ID:", post.id)
-    print("Title:", post.title)
-    print("Body:", post.body)
-
-
-asyncio.run(mainp())
-
-
-asyncio.run(maink())
 
 
 # testing custom json helper
@@ -92,6 +48,10 @@ def print_top_client():
     with provider.create_scope() as scope:
         service = scope.get(IClientService)
         client = asyncio.run(service.get_top_client())
+        if client is None:
+            print("No client found")
+            return
+        
         print(client)
         print(client.name)
         print(client.website)
@@ -174,3 +134,50 @@ run_email_task()
 
 
 # enable or disable ruff warning per line or per method or whole file use # ruff: noqa  and # ruff: enable
+
+
+# testing api request
+
+
+# class PostResponse(BaseModel):
+#     userId: int
+#     id: int
+#     title: str
+#     body: str
+
+
+# async def maink():
+#     api = ApiClient(base_url="https://jsonplaceholder.typicode.com")
+
+#     post = await api.get(
+#         endpoint="/posts/1", params=None, headers=None, response_model=PostResponse
+#     )
+
+#     print("Post ID:", post.id)
+#     print("Title:", post.title)
+#     print("Body:", post.body[:50], "...")  # preview
+
+
+# async def mainp():
+#     api = ApiClient(base_url="https://jsonplaceholder.typicode.com")
+
+#     payload = {
+#         "title": "FlightDeck Test",
+#         "body": "This is a test post from Sudip's DAG.",
+#         "userId": 99,
+#     }
+#     headers = {"Content-Type": "application/json"}
+
+#     post = await api.post(
+#         endpoint="/posts", payload=payload, headers=headers, response_model=PostResponse
+#     )
+
+#     print("Created Post ID:", post.id)
+#     print("Title:", post.title)
+#     print("Body:", post.body)
+
+
+# asyncio.run(mainp())
+
+
+# asyncio.run(maink())

@@ -11,8 +11,8 @@ def build_container() -> Container:
     container = Container()
 
     # SINGLETON (created once)
-    # container.add_singleton(AppSettings)
-    settings = AppSettings()
+        
+    settings = AppSettings() # type: ignore
     container.add_instance(settings, AppSettings)
 
     # TRANSIENT (new every time)

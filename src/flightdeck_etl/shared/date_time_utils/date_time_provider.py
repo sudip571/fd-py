@@ -1,6 +1,7 @@
 
 from datetime import datetime, timezone, timedelta
 from dateutil.relativedelta import relativedelta
+from typing import Dict,Any,Optional
 from ..logging.loggers import Log
 import calendar
 import json
@@ -43,7 +44,7 @@ class DateTimeProvider:
         raise ValueError(f"Invalid breakdown: {break_down}")
 
     @staticmethod
-    def get_first_and_last_day_of_month(month: int) -> json:
+    def get_first_and_last_day_of_month(month: int) -> Optional[Dict[str, Any]]:
         """_summary_
 
         Args:
@@ -58,7 +59,7 @@ class DateTimeProvider:
             one_month_ago = current_date - relativedelta(months=month)
 
             year = str(one_month_ago).split('-')[0]
-            month = str(one_month_ago).split('-')[1]
+            month = one_month_ago.month
 
             first, last = calendar.monthrange(int(year), int(month))
 
@@ -74,3 +75,5 @@ class DateTimeProvider:
 
         except Exception as e:
             Log.error("Got unexcepted error:", error=e)
+            return None
+            
