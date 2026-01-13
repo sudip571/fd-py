@@ -1,6 +1,8 @@
-
 import asyncio
+
 from flightdeck_etl.di_container.di import build_container
+
+# ruff: noqa
 
 
 def run_service(service_type, method_name: str, *args, **kwargs):

@@ -1,14 +1,13 @@
-from pydantic import BaseModel
-import pyodbc
-from flightdeck_etl.shared.models.client_model import Client
-from flightdeck_etl.shared import json_helpers, Log, ApiClient
 import asyncio
-from typing import cast
-from flightdeck_etl.di_container.di import build_container
+
+from pydantic import BaseModel
+
 from flightdeck_etl.airflow_dag.airflow_helpers import run_service
-from flightdeck_etl.shared.connections.database_connection import DatabaseConnection
+from flightdeck_etl.di_container.di import build_container
 from flightdeck_etl.modules.sev.contracts.iclient_service import IClientService
+from flightdeck_etl.shared import ApiClient, Log, json_helpers
 from flightdeck_etl.shared.emails.email_service import EmailService
+from flightdeck_etl.shared.models.client_model import Client
 
 Log.debug("Something went wrong", error_code=500)
 
@@ -27,10 +26,7 @@ async def maink():
     api = ApiClient(base_url="https://jsonplaceholder.typicode.com")
 
     post = await api.get(
-        endpoint="/posts/1",
-        params=None,
-        headers=None,
-        response_model=PostResponse
+        endpoint="/posts/1", params=None, headers=None, response_model=PostResponse
     )
 
     print("Post ID:", post.id)
@@ -44,20 +40,18 @@ async def mainp():
     payload = {
         "title": "FlightDeck Test",
         "body": "This is a test post from Sudip's DAG.",
-        "userId": 99
+        "userId": 99,
     }
     headers = {"Content-Type": "application/json"}
 
     post = await api.post(
-        endpoint="/posts",
-        payload=payload,
-        headers=headers,
-        response_model=PostResponse
+        endpoint="/posts", payload=payload, headers=headers, response_model=PostResponse
     )
 
     print("Created Post ID:", post.id)
     print("Title:", post.title)
     print("Body:", post.body)
+
 
 asyncio.run(mainp())
 
@@ -67,8 +61,9 @@ asyncio.run(maink())
 
 # testing custom json helper
 # Create instance
-client = Client(client_id=1, name="Bruce Clay Australia",
-                website="www.bruceclay.com/au")
+client = Client(
+    client_id=1, name="Bruce Clay Australia", website="www.bruceclay.com/au"
+)
 
 # Serialize
 json_str = json_helpers.serialize(client)
@@ -107,7 +102,6 @@ print_top_client()
 
 # testing complete async method with DI
 async def mainn():
-
     container = build_container()
     provider = container.build_provider()
 
@@ -135,7 +129,7 @@ def run_email_task():
                 project_name="SEO Campaign",
                 email_template_path="templates/welcome.html",
                 email_subject="Welcome to FlightDeck",
-                user_email="sudip@example.com"
+                user_email="sudip@example.com",
             )
         )
 
@@ -177,3 +171,6 @@ run_email_task()
 # Log.debug("Something went wrong", error_code=500) # or
 # db_logger = configure_logging(logger_name="Database", log_path="./logs/db.log")
 # db_logger.info("Connected to MSSQL", server="SQLAUAWSFDB01DV")
+
+
+# enable or disable ruff warning per line or per method or whole file use # ruff: noqa  and # ruff: enable
