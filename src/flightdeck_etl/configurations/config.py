@@ -10,14 +10,21 @@ from pydantic_settings import (
     DotEnvSettingsSource,
     SettingsConfigDict,
 )
+import os
 
 
 class AppSettings(BaseSettings, PropertiesSettings):
 
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent
     CONFIG_FILE_PATH: ClassVar[str] = str(
-        BASE_DIR.parent / "configuration" / "appsettings.json"
+        BASE_DIR.parent / "configurations" / "appsettings.json"
     )
+
+    ENV: ClassVar[str] = os.getenv("ENV", "development").lower()
+    if ENV == "production":
+        CONFIG_FILE_PATH: ClassVar[str] = str(
+            BASE_DIR.parent / "configurations" / "appsettings.production.json")
+
     ENV_FILE_PATH: ClassVar[str] = str(
         BASE_DIR.parent.parent / ".env"
     )
@@ -65,8 +72,8 @@ class AppSettings(BaseSettings, PropertiesSettings):
 
     @property
     def is_development(self) -> bool:
-        return self.environment.lower() == "development"
+        return self.Environment.lower() == "development"
 
     @property
     def is_production(self) -> bool:
-        return self.environment.lower() == "production"
+        return self.Environment.lower() == "production"
