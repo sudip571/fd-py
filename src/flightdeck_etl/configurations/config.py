@@ -1,20 +1,20 @@
-from typing import Tuple, Type, ClassVar
+import os
 from pathlib import Path
-from .config_properties import PropertiesSettings
-from pydantic import BaseModel, Field
+from typing import ClassVar
+
 from pydantic_settings import (
     BaseSettings,
-    PydanticBaseSettingsSource,
-    JsonConfigSettingsSource,
-    EnvSettingsSource,
     DotEnvSettingsSource,
+    EnvSettingsSource,
+    JsonConfigSettingsSource,
+    PydanticBaseSettingsSource,
     SettingsConfigDict,
 )
-import os
+
+from .config_properties import PropertiesSettings
 
 
-class AppSettings(BaseSettings, PropertiesSettings): # type: ignore
-
+class AppSettings(BaseSettings, PropertiesSettings):  # type: ignore
     BASE_DIR: ClassVar[Path] = Path(__file__).resolve().parent
     CONFIG_FILE_PATH: ClassVar[str] = str(
         BASE_DIR.parent / "configurations" / "appsettings.json"
@@ -23,11 +23,11 @@ class AppSettings(BaseSettings, PropertiesSettings): # type: ignore
     ENV: ClassVar[str] = os.getenv("ENV", "development").lower()
     if ENV == "production":
         CONFIG_FILE_PATH: ClassVar[str] = str(
-            BASE_DIR.parent / "configurations" / "appsettings.production.json")
+            BASE_DIR.parent / "configurations" / "appsettings.production.json"
+        )
 
-    ENV_FILE_PATH: ClassVar[str] = str(
-        BASE_DIR.parent.parent / ".env"
-    )
+    ENV_FILE_PATH: ClassVar[str] = str(BASE_DIR.parent.parent.parent / ".env")
+    print(ENV_FILE_PATH)
 
     model_config = SettingsConfigDict(
         populate_by_name=True,
@@ -40,13 +40,12 @@ class AppSettings(BaseSettings, PropertiesSettings): # type: ignore
     @classmethod
     def settings_customise_sources(
         cls,
-        settings_cls: Type[BaseSettings],
+        settings_cls: type[BaseSettings],
         init_settings: PydanticBaseSettingsSource,
         env_settings: PydanticBaseSettingsSource,
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
-    ) -> Tuple[PydanticBaseSettingsSource, ...]:
-
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
         # Explicitly create all sources with proper configuration
         return (
             DotEnvSettingsSource(
@@ -67,7 +66,7 @@ class AppSettings(BaseSettings, PropertiesSettings): # type: ignore
             JsonConfigSettingsSource(
                 settings_cls=settings_cls,
                 json_file=cls.CONFIG_FILE_PATH,
-            )
+            ),
         )
 
     @property

@@ -1,100 +1,111 @@
 import asyncio
 
-from pydantic import BaseModel
-
-from flightdeck_etl.airflow_dag.airflow_helpers import run_service
-from flightdeck_etl.di_container.di import build_container
+from flightdeck_etl.configurations.config import AppSettings
+from flightdeck_etl.di_container.di import service_provider
 from flightdeck_etl.modules.sev.contracts.iclient_service import IClientService
-from flightdeck_etl.shared import ApiClient, Log, json_helpers
-from flightdeck_etl.shared.emails.email_service import EmailService
-from flightdeck_etl.shared.models.client_model import Client
+from flightdeck_etl.shared import Log
+
+appset = service_provider().get(AppSettings)
 
 Log.debug("Something went wrong", error_code=500)
+Log.info("from appsetting", appset.Mssql)
 
 
+def print_top_client():
+    service = service_provider().get(IClientService)
+    client = asyncio.run(service.get_top_client())
+    if client is None:
+        print("No client found")
+        return
 
-
-
-# testing custom json helper
-# Create instance
-client = Client(
-    client_id=1, name="Bruce Clay Australia", website="www.bruceclay.com/au"
-)
-
-# Serialize
-json_str = json_helpers.serialize(client)
-print(json_str)
-
-# Deserialize back to Client
-client_obj = json_helpers.deserialize(json_str, Client)
-print(client_obj.name)  # Bruce Clay Australia
-
-
-# testing DI helper method
-def print_top_client1():
-    client = run_service(IClientService, "get_top_client")
     print(client)
     print(client.name)
     print(client.website)
 
 
-print_top_client1()
-
-
-# testing async inside sync with DI
-def print_top_client():
-    container = build_container()
-    provider = container.build_provider()
-    with provider.create_scope() as scope:
-        service = scope.get(IClientService)
-        client = asyncio.run(service.get_top_client())
-        if client is None:
-            print("No client found")
-            return
-        
-        print(client)
-        print(client.name)
-        print(client.website)
-
-
 print_top_client()
 
 
-# testing complete async method with DI
-async def mainn():
-    container = build_container()
-    provider = container.build_provider()
+# # testing custom json helper
+# # Create instance
+# client = Client(
+#     client_id=1, name="Bruce Clay Australia", website="www.bruceclay.com/au"
+# )
 
-    with provider.create_scope() as scope:
-        service = scope.get(IClientService)
-        client = await service.get_top_client()
-        print(client)
+# # Serialize
+# json_str = json_helpers.serialize(client)
+# print(json_str)
 
-
-if __name__ == "__main__":
-    asyncio.run(mainn())
-
-
-# testing email sending
-def run_email_task():
-    container = build_container()
-    provider = container.build_provider()
-
-    with provider.create_scope() as scope:
-        email_service = scope.get(EmailService)
-        asyncio.run(
-            email_service.send_email(
-                user_name="Sudip",
-                client_name="Bruce Clay Australia",
-                project_name="SEO Campaign",
-                email_template_path="templates/welcome.html",
-                email_subject="Welcome to FlightDeck",
-                user_email="sudip@example.com",
-            )
-        )
+# # Deserialize back to Client
+# client_obj = json_helpers.deserialize(json_str, Client)
+# print(client_obj.name)  # Bruce Clay Australia
 
 
-run_email_task()
+# # testing DI helper method
+# def print_top_client1():
+#     client = run_service(IClientService, "get_top_client")
+#     print(client)
+#     print(client.name)
+#     print(client.website)
+
+
+# print_top_client1()
+
+
+# # testing async inside sync with DI
+# def print_top_client():
+#     container = build_container()
+#     provider = container.build_provider()
+#     with provider.create_scope() as scope:
+#         service = scope.get(IClientService)
+#         client = asyncio.run(service.get_top_client())
+#         if client is None:
+#             print("No client found")
+#             return
+
+#         print(client)
+#         print(client.name)
+#         print(client.website)
+
+
+# print_top_client()
+
+
+# # testing complete async method with DI
+# async def mainn():
+#     container = build_container()
+#     provider = container.build_provider()
+
+#     with provider.create_scope() as scope:
+#         service = scope.get(IClientService)
+#         client = await service.get_top_client()
+#         print(client)
+
+
+# if __name__ == "__main__":
+#     asyncio.run(mainn())
+
+
+# # testing email sending
+# def run_email_task():
+#     container = build_container()
+#     provider = container.build_provider()
+
+#     with provider.create_scope() as scope:
+#         email_service = scope.get(EmailService)
+#         asyncio.run(
+#             email_service.send_email(
+#                 user_name="Sudip",
+#                 client_name="Bruce Clay Australia",
+#                 project_name="SEO Campaign",
+#                 email_template_path="templates/welcome.html",
+#                 email_subject="Welcome to FlightDeck",
+#                 user_email="sudip@example.com",
+#             )
+#         )
+
+
+# run_email_task()
 
 
 # testing custom idisposable
